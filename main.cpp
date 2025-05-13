@@ -7,10 +7,13 @@
 using namespace std;
 
 // Заполняет матрицу рандомными числами от 0 до 9
-void fill_matrix(vector<vector<int>> &matrix) {
-    for (vector<int> &i : matrix) {
-        for (int &j : i) {
-            j = rand() % 10; // NOLINT(*-msc50-cpp)
+void fill_matrix(vector<vector<double>> &matrix) {
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_real_distribution<double> dist(0.0, 9.0);
+    for (vector<double> &i : matrix) {
+        for (double &j : i) {
+            j = dist(gen); // NOLINT(*-msc50-cpp)
         }
     }
 }
@@ -27,17 +30,21 @@ void fill_stochastic_matrix(vector<vector<double>> &matrix) {
 
     for (int i = 0; i < matrix[0].size(); ++i) {
         double temp = 0.0;
-        for (vector<double> &j : matrix) {
+        for (int j = 0; j < matrix.size(); ++j) {
             uniform_real_distribution<double> dist(0.0, 1.0 - temp);
             const double generated_number = dist(gen);
-            j[i] = generated_number;
-            temp = generated_number;
+            if (j == matrix.size() - 1) {
+                matrix[j][i] = 1.0 - temp;
+            } else {
+                matrix[j][i] = generated_number;
+                temp = matrix[j][i];
+            }
         }
     }
 }
 
 // Перемножает две матрицы
-vector<vector<auto>> multiply_matrix(const vector<vector<auto>> &matrix1, const vector<vector<auto>> &matrix2) {
+vector<vector<double>> multiply_matrix(const vector<vector<double>> &matrix1, const vector<vector<double>> &matrix2) {
     // Проверка на возможность перемножения матриц
     if (matrix1[0].size() != matrix2.size()) {
         cout << "Матрицы не могут быть перемножены!" << endl;
@@ -45,7 +52,7 @@ vector<vector<auto>> multiply_matrix(const vector<vector<auto>> &matrix1, const 
     }
 
     // Создание матрицы на вывод
-    vector<vector<auto>> result(matrix1.size(), vector<auto>(matrix2[0].size()));
+    vector<vector<double>> result(matrix1.size(), vector<double>(matrix2[0].size()));
 
     // Перемножение
     for (int i = 0; i < matrix1.size(); ++i) {
@@ -60,9 +67,9 @@ vector<vector<auto>> multiply_matrix(const vector<vector<auto>> &matrix1, const 
 }
 
 // Проверяет данные матрицы на соответствие условиям
-void check_matrix_parameters(int &rows, int &columns) {
-    if (rows < 1 || rows > 10 || columns < 1 || columns > 10) {
-        constexpr int default_parameters[4] = {3, 4, 4, 6};
+void check_matrix_parameters(double &rows, double &columns) {
+    if (rows < 1.0 || rows > 10.0 || columns < 1.0 || columns > 10.0) {
+        constexpr double default_parameters[4] = {3.0, 4.0, 4.0, 6.0};
         cout << "Некорректные параметры, используются параметры по умолчанию: " << default_parameters[0] << " строк, "
         << default_parameters[1] << " столбцов" << endl;
         rows = default_parameters[0];
@@ -70,9 +77,9 @@ void check_matrix_parameters(int &rows, int &columns) {
     }
 }
 
-void display_matrix(auto &matrix) {
-    for (const auto &i : matrix) {
-        for (const auto &j : i) {
+void display_matrix(const vector<vector<double>> &matrix) {
+    for (const vector<double> &i : matrix) {
+        for (const double &j : i) {
             cout << j << " ";
         }
         cout << endl;
@@ -81,10 +88,10 @@ void display_matrix(auto &matrix) {
 
 // Задание 1
 void manipulating_matrix() {
-    int row1 = 3;
-    int column1 = 4;
-    int row2 = 4;
-    int column2 = 6;
+    double row1 = 3.0;
+    double column1 = 4.0;
+    double row2 = 4.0;
+    double column2 = 6.0;
 
     cout << "Введите количество строк и столбцов для первой матрицы (через пробел от 1 до 10): " << endl;
     cin >> row1 >> column1;
@@ -98,15 +105,15 @@ void manipulating_matrix() {
     cout << "Первая матрица: " << row1 << " строк, " << column1 << " столбцов" << endl;
     cout << "Вторая матрица: " << row2 << " строк, " << column2 << " столбцов" << endl;
 
-    vector<vector<int>> matrix1(row1, vector<int>(column1));
-    vector<vector<int>> matrix2(row2, vector<int>(column2));
+    vector<vector<double>> matrix1(row1, vector<double>(column1));
+    vector<vector<double>> matrix2(row2, vector<double>(column2));
 
     cout << "Заполняем матрицу рандомными значениями..." << endl;
     fill_matrix(matrix1);
     fill_matrix(matrix2);
 
     cout << "Перемножаем матрицы..." << endl;
-    const vector<vector<int>> result = multiply_matrix(matrix1, matrix2);
+    const vector<vector<double>> result = multiply_matrix(matrix1, matrix2);
 
     cout << "Новая (перемноженная) матрица:" << endl;
     display_matrix(result);
@@ -137,9 +144,15 @@ void manipulating_stochastic_matrix() {
         display_matrix(matrix);
     }
 
-    vector<double> initial_probabilities(N, 1.0 / N);
+    const vector<vector<double>> initial_probabilities(N, vector<double>(1, 1.0 / N));
+    cout << "Матрица первоначальных вероятностей: " << endl;
+    display_matrix(initial_probabilities);
 
+    cout << "Перемножаем матрицы..." << endl;
+    const vector<vector<double>> result = multiply_matrix(matrix, initial_probabilities);
 
+    cout << "Итоговая матрица:" << endl;
+    display_matrix(result);
 }
 
 int main() {
