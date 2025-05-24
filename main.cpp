@@ -13,7 +13,7 @@ void fill_matrix(vector<vector<double>> &matrix) {
     uniform_real_distribution<double> dist(0.0, 9.0);
     for (vector<double> &i : matrix) {
         for (double &j : i) {
-            j = dist(gen); // NOLINT(*-msc50-cpp)
+            j = dist(gen);
         }
     }
 }
@@ -28,18 +28,17 @@ void fill_stochastic_matrix(vector<vector<double>> &matrix) {
         return;
     }
 
-    for (int i = 0; i < matrix[0].size(); ++i) {
+    // Для стохастической матрицы сумма элементов по СТРОКАМ должна быть равна 1
+    for (int i = 0; i < matrix.size(); ++i) { // перебираем строки
         double temp = 0.0;
-        for (int j = 0; j < matrix.size(); ++j) {
+        for (int j = 0; j < matrix[i].size() - 1; ++j) { // перебираем столбцы, кроме последнего
             uniform_real_distribution<double> dist(0.0, 1.0 - temp);
             const double generated_number = dist(gen);
-            if (j == matrix.size() - 1) {
-                matrix[j][i] = 1.0 - temp;
-            } else {
-                matrix[j][i] = generated_number;
-                temp = matrix[j][i];
-            }
+            matrix[i][j] = generated_number;
+            temp += matrix[i][j];
         }
+        // Последний элемент строки заполняем так, чтобы сумма стала ровно 1
+        matrix[i][matrix[i].size() - 1] = 1.0 - temp;
     }
 }
 
@@ -144,14 +143,16 @@ void manipulating_stochastic_matrix() {
         display_matrix(matrix);
     }
 
-    const vector<vector<double>> initial_probabilities(N, vector<double>(1, 1.0 / N));
+    // Вектор-строка начальных вероятностей (равномерное распределение)
+    const vector<vector<double>> initial_probabilities(1, vector<double>(N, 1.0 / N));
     cout << "Матрица первоначальных вероятностей: " << endl;
     display_matrix(initial_probabilities);
 
     cout << "Перемножаем матрицы..." << endl;
-    const vector<vector<double>> result = multiply_matrix(matrix, initial_probabilities);
+    // Вектор-строка умножается на стохастическую матрицу (строки на столбцы)
+    const vector<vector<double>> result = multiply_matrix(initial_probabilities, matrix);
 
-    cout << "Итоговая матрица:" << endl;
+    cout << "Итоговая матрица вероятностей:" << endl;
     display_matrix(result);
 }
 
