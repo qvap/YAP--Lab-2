@@ -8,12 +8,13 @@ using namespace std;
 
 // Заполняет матрицу рандомными числами от 0 до 9
 void fill_matrix(vector<vector<double>> &matrix) {
+    constexpr int steps = (9.0 - 0.0) / 1.0;
     random_device rd;
     mt19937 gen(rd());
-    uniform_real_distribution<double> dist(0.0, 9.0);
+    uniform_int_distribution<int> dist(0, steps);
     for (vector<double> &i : matrix) {
         for (double &j : i) {
-            j = dist(gen);
+            j = 0.0 + dist(gen) * 1.0;
         }
     }
 }
@@ -100,16 +101,16 @@ void manipulating_matrix() {
     cin >> row2 >> column2;
     check_matrix_parameters(row2, column2);
 
-    cout << "Введены значения:" << endl;
-    cout << "Первая матрица: " << row1 << " строк, " << column1 << " столбцов" << endl;
-    cout << "Вторая матрица: " << row2 << " строк, " << column2 << " столбцов" << endl;
-
     vector<vector<double>> matrix1(row1, vector<double>(column1));
     vector<vector<double>> matrix2(row2, vector<double>(column2));
-
     cout << "Заполняем матрицу рандомными значениями..." << endl;
     fill_matrix(matrix1);
     fill_matrix(matrix2);
+    cout << "Введены значения:" << endl;
+    cout << "Первая матрица: " << row1 << " строк, " << column1 << " столбцов" << endl;
+    display_matrix(matrix1);
+    cout << "Вторая матрица: " << row2 << " строк, " << column2 << " столбцов" << endl;
+    display_matrix(matrix2);
 
     cout << "Перемножаем матрицы..." << endl;
     const vector<vector<double>> result = multiply_matrix(matrix1, matrix2);
